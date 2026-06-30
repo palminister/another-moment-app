@@ -1,0 +1,17 @@
+{
+  "name": "Another Moment",
+  "short_name": "Moment Debt",
+  "description": "A shared-balance calculator for choosing the next moment together.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-app-background: #fc483d;
+  --color-app-foreground: #111111;
+  --color-app-muted: #9f9f9f;
+  --color-app-mutedborder: #bdbdbd;
+  --color-app-gray: #eeeeee;
+  --color-app-grayborder: #bdbdbd;
+  --color-app-darkgray: #342e30;
+  --color-app-darkgrayborder: #51474a;
+  --color-app-border: #d4d4d4;
+  --color-app-surface: #ffffff;
+  --color-app-accent: #4aa6ee;
+  --color-app-accentborder: #61b4f5;
+  --color-app-darkblue: #565fa1;
+  --color-app-darkblueborder: #6671c0;
+  --color-app-screen: #211e24;
+  --color-app-danger: #fc483d;
+  --color-app-yellow: #fbbc2f;
+  --color-app-yellowborder: #ffde3a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-app-background);
+  color: var(--color-app-foreground);
+}
+
+button,
+input {
+  font: inherit;
+}
