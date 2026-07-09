@@ -1,7 +1,5 @@
 import type { Payer, Transaction } from "@/lib/types";
 
-export const STORAGE_KEY = "another-moment.transactions.v1";
-
 export function createTransaction(input: {
   payer: Payer;
   note: string;

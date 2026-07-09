@@ -14,7 +14,7 @@ import {
 } from "@/lib/calculator";
 import { createTransaction } from "@/lib/ledger";
 import type { CalculatorButton } from "@/lib/types";
-import { useLocalTransactions } from "@/hooks/useLocalTransactions";
+import { useSupabaseTransactions } from "@/hooks/useSupabaseTransactions";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 
 export default function Home() {
@@ -25,7 +25,7 @@ export default function Home() {
     initialCalculatorState,
   );
   const { transactions, balance, addTransaction, deleteTransaction } =
-    useLocalTransactions();
+    useSupabaseTransactions();
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [suggestionOffset, setSuggestionOffset] = useState(0);
@@ -75,7 +75,7 @@ export default function Home() {
         isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
         onConfirm={({ payer, note }) => {
-          addTransaction(
+          void addTransaction(
             createTransaction({
               payer,
               note,

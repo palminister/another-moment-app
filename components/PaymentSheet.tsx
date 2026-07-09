@@ -96,9 +96,7 @@ export function PaymentSheet({
               </button>
             </div>
 
-            <p className="tracking-widest font-extrabold">
-              --------------------------------------------
-            </p>
+            <div className="border-b-[3px] border-black border-dashed" />
 
             <fieldset className="grid grid-cols-2 gap-2 font-bold text-xl">
               <legend className="sr-only">Payer</legend>
@@ -138,9 +136,7 @@ export function PaymentSheet({
               {amount}
             </button>
 
-            <p className="tracking-widest font-extrabold">
-              --------------------------------------------
-            </p>
+            <div className="border-b-[3px] border-black border-dashed" />
           </form>
         )}
       </div>
