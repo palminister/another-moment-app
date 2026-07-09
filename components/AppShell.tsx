@@ -125,7 +125,7 @@ export function AppShell({ initialTransactions }: AppShellProps) {
         isOpen={isAuthOpen}
         message={writerAuth.message}
         onClose={() => setIsAuthOpen(false)}
-        onSendMagicLink={writerAuth.sendMagicLink}
+        onSignIn={writerAuth.signIn}
         onSignOut={writerAuth.signOut}
       />
       {error ? (

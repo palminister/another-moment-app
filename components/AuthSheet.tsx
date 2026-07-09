@@ -8,7 +8,7 @@ type AuthSheetProps = {
   isOpen: boolean;
   message: string | null;
   onClose: () => void;
-  onSendMagicLink: (email: string) => Promise<void>;
+  onSignIn: (email: string, password: string) => Promise<void>;
   onSignOut: () => Promise<void>;
 };
 
@@ -18,16 +18,17 @@ export function AuthSheet({
   isOpen,
   message,
   onClose,
-  onSendMagicLink,
+  onSignIn,
   onSignOut,
 }: AuthSheetProps) {
   const [inputEmail, setInputEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
-    await onSendMagicLink(inputEmail);
+    await onSignIn(inputEmail, password);
     setIsSubmitting(false);
   }
 
@@ -79,12 +80,25 @@ export function AuthSheet({
                 placeholder="you@example.com"
               />
             </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-semibold">
+                Password
+              </span>
+              <input
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full border px-3 py-3"
+                autoComplete="current-password"
+                type="password"
+                placeholder="Password"
+              />
+            </label>
             <button
               type="submit"
               className="w-full border px-4 py-3"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Sending..." : "Send magic link"}
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </button>
           </form>
         )}

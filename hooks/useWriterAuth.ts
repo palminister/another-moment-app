@@ -42,7 +42,7 @@ export function useWriterAuth() {
 
   const email = useMemo(() => session?.user.email ?? null, [session]);
 
-  const sendMagicLink = useCallback(async (rawEmail: string) => {
+  const signIn = useCallback(async (rawEmail: string, password: string) => {
     const email = rawEmail.trim().toLowerCase();
 
     if (!email) {
@@ -50,15 +50,18 @@ export function useWriterAuth() {
       return;
     }
 
+    if (!password) {
+      setError("Enter your password.");
+      return;
+    }
+
     const supabase = getSupabaseBrowserClient();
     setError(null);
     setMessage(null);
 
-    const { error: signInError } = await supabase.auth.signInWithOtp({
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
+      password,
     });
 
     if (signInError) {
@@ -66,7 +69,7 @@ export function useWriterAuth() {
       return;
     }
 
-    setMessage("Check your email for a sign-in link.");
+    setMessage("Signed in.");
   }, []);
 
   const signOut = useCallback(async () => {
@@ -82,7 +85,7 @@ export function useWriterAuth() {
     isLoaded,
     isSignedIn: Boolean(session),
     message,
-    sendMagicLink,
+    signIn,
     signOut,
   };
 }

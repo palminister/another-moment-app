@@ -24,8 +24,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 Run the SQL in `supabase/transactions.sql` in your Supabase SQL editor to
 create the shared transactions table and RLS policies.
 
-Magic-link write access is controlled by `public.allowed_writers`. Add allowed
-emails with SQL:
+Email/password write access is controlled by `public.allowed_writers`. Create
+the user in Supabase Authentication first, then add the same email with SQL:
+
+1. Supabase Dashboard > Authentication > Users > Add user.
+2. Enter the user's email and password.
+3. Mark the email as confirmed.
+4. Add the same email to `public.allowed_writers`.
 
 ```sql
 insert into public.allowed_writers (email, note)
@@ -40,6 +45,9 @@ insert into public.allowed_writers (email, note)
 values ('tisa-email@example.com', 'Tisa')
 on conflict (email) do update set note = excluded.note;
 ```
+
+You can also add writers in Supabase Table Editor by opening
+`public.allowed_writers` and inserting a row with `email` and `note`.
 
 ## Electron Wrapper
 
