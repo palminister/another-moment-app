@@ -1,6 +1,6 @@
 {
   "name": "Another Moment",
-  "short_name": "Another Moment",
+  "short_name": "Another",
   "description": "A shared-balance calculator for choosing the next moment together.",
   "start_url": "/",
   "display": "standalone",
