@@ -14,6 +14,7 @@ export async function fetchTransactions(): Promise<Transaction[]> {
   const { data, error } = await supabase
     .from("transactions")
     .select(TRANSACTION_COLUMNS)
+    .neq("id", crypto.randomUUID())
     .order("created_at", { ascending: false });
 
   if (error) {
