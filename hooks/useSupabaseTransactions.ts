@@ -6,6 +6,7 @@ import {
   fetchTransactions,
   insertTransaction,
   removeTransaction,
+  subscribeToTransactionChanges,
 } from "@/lib/transactionsRepository";
 import type { Transaction } from "@/lib/types";
 
@@ -44,6 +45,43 @@ export function useSupabaseTransactions() {
       isMounted = false;
     };
   }, []);
+
+  const refreshTransactions = useCallback(async () => {
+    try {
+      const storedTransactions = await fetchTransactions();
+      setTransactions((current) =>
+        mergeTransactions(current, storedTransactions),
+      );
+      setError(null);
+    } catch (refreshError) {
+      setError(getErrorMessage(refreshError));
+    }
+  }, []);
+
+  useEffect(() => {
+    return subscribeToTransactionChanges(
+      () => {
+        void refreshTransactions();
+      },
+      setError,
+    );
+  }, [refreshTransactions]);
+
+  useEffect(() => {
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") {
+        void refreshTransactions();
+      }
+    }
+
+    window.addEventListener("focus", refreshTransactions);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      window.removeEventListener("focus", refreshTransactions);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [refreshTransactions]);
 
   const addTransaction = useCallback(async (transaction: Transaction) => {
     setTransactions((current) => [transaction, ...current]);

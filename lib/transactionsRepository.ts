@@ -23,6 +23,33 @@ export async function fetchTransactions(): Promise<Transaction[]> {
   return data.map(rowToTransaction);
 }
 
+export function subscribeToTransactionChanges(
+  onChange: () => void,
+  onError?: (message: string) => void,
+): () => void {
+  const supabase = getSupabaseBrowserClient();
+  const channel = supabase
+    .channel("transactions-changes")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "transactions" },
+      onChange,
+    )
+    .subscribe((status, error) => {
+      if (error) {
+        onError?.(error.message);
+      }
+
+      if (status === "CHANNEL_ERROR") {
+        onError?.("Unable to subscribe to transaction changes.");
+      }
+    });
+
+  return () => {
+    void supabase.removeChannel(channel);
+  };
+}
+
 export async function insertTransaction(
   transaction: Transaction,
 ): Promise<Transaction> {
