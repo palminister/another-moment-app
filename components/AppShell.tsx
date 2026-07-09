@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducer, useState } from "react";
+import { AuthSheet } from "@/components/AuthSheet";
 import { BalanceSummary } from "@/components/BalanceSummary";
 import { CalculatorDisplay } from "@/components/CalculatorDisplay";
 import { CalculatorKeypad } from "@/components/CalculatorKeypad";
@@ -8,6 +9,7 @@ import { HistoryPanel } from "@/components/HistoryPanel";
 import { PaymentSheet } from "@/components/PaymentSheet";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { useSupabaseTransactions } from "@/hooks/useSupabaseTransactions";
+import { useWriterAuth } from "@/hooks/useWriterAuth";
 import {
   currentAmount,
   getCalculatorDisplayLines,
@@ -28,8 +30,10 @@ export function AppShell({ initialTransactions }: AppShellProps) {
     reduceCalculator,
     initialCalculatorState,
   );
-  const { transactions, balance, addTransaction, deleteTransaction } =
+  const { transactions, balance, addTransaction, deleteTransaction, error } =
     useSupabaseTransactions(initialTransactions);
+  const writerAuth = useWriterAuth();
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [suggestionOffset, setSuggestionOffset] = useState(0);
@@ -49,6 +53,15 @@ export function AppShell({ initialTransactions }: AppShellProps) {
     }
 
     setIsPaymentOpen(true);
+  }
+
+  function requireWriterAccess() {
+    if (writerAuth.isSignedIn) {
+      return true;
+    }
+
+    setIsAuthOpen(true);
+    return false;
   }
 
   return (
@@ -78,6 +91,10 @@ export function AppShell({ initialTransactions }: AppShellProps) {
         isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
         onConfirm={({ payer, note }) => {
+          if (!requireWriterAccess()) {
+            return;
+          }
+
           void addTransaction(
             createTransaction({
               payer,
@@ -94,8 +111,28 @@ export function AppShell({ initialTransactions }: AppShellProps) {
         isOpen={isHistoryOpen}
         transactions={transactions}
         onClose={() => setIsHistoryOpen(false)}
-        onDelete={deleteTransaction}
+        onDelete={(id) => {
+          if (!requireWriterAccess()) {
+            return;
+          }
+
+          void deleteTransaction(id);
+        }}
       />
+      <AuthSheet
+        email={writerAuth.email}
+        error={writerAuth.error}
+        isOpen={isAuthOpen}
+        message={writerAuth.message}
+        onClose={() => setIsAuthOpen(false)}
+        onSendMagicLink={writerAuth.sendMagicLink}
+        onSignOut={writerAuth.signOut}
+      />
+      {error ? (
+        <p className="fixed bottom-2 left-2 right-2 z-50 bg-white p-3 text-sm text-red-600">
+          {error}
+        </p>
+      ) : null}
     </main>
   );
 }

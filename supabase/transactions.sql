@@ -7,13 +7,25 @@ create table if not exists public.transactions (
   created_at timestamptz not null default now()
 );
 
-alter table public.transactions enable row level security;
+create table if not exists public.allowed_writers (
+  email text primary key,
+  note text,
+  created_at timestamptz not null default now()
+);
 
-grant select, insert, delete on public.transactions to anon, authenticated;
+alter table public.transactions enable row level security;
+alter table public.allowed_writers enable row level security;
+
+grant select on public.transactions to anon, authenticated;
+grant insert, delete on public.transactions to authenticated;
+revoke insert, delete on public.transactions from anon;
+
+grant select on public.allowed_writers to authenticated;
 
 drop policy if exists "Anyone can read shared transactions" on public.transactions;
 drop policy if exists "Anyone can add shared transactions" on public.transactions;
 drop policy if exists "Anyone can delete shared transactions" on public.transactions;
+drop policy if exists "Allowed writers can read themselves" on public.allowed_writers;
 
 create policy "Anyone can read shared transactions"
   on public.transactions
@@ -24,14 +36,32 @@ create policy "Anyone can read shared transactions"
 create policy "Anyone can add shared transactions"
   on public.transactions
   for insert
-  to anon, authenticated
-  with check (true);
+  to authenticated
+  with check (
+    exists (
+      select 1
+      from public.allowed_writers
+      where lower(allowed_writers.email) = lower(auth.jwt() ->> 'email')
+    )
+  );
 
 create policy "Anyone can delete shared transactions"
   on public.transactions
   for delete
-  to anon, authenticated
-  using (true);
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.allowed_writers
+      where lower(allowed_writers.email) = lower(auth.jwt() ->> 'email')
+    )
+  );
+
+create policy "Allowed writers can read themselves"
+  on public.allowed_writers
+  for select
+  to authenticated
+  using (lower(email) = lower(auth.jwt() ->> 'email'));
 
 do $$
 begin

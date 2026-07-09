@@ -28,6 +28,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      allowed_writers: {
+        Row: {
+          email: string;
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          email: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          email?: string;
+          note?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
