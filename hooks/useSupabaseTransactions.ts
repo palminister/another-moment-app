@@ -10,9 +10,12 @@ import {
 } from "@/lib/transactionsRepository";
 import type { Transaction } from "@/lib/types";
 
-export function useSupabaseTransactions() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+export function useSupabaseTransactions(
+  initialTransactions: Transaction[] = [],
+) {
+  const [transactions, setTransactions] =
+    useState<Transaction[]>(initialTransactions);
+  const [isLoaded, setIsLoaded] = useState(initialTransactions.length > 0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
