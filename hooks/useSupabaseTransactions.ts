@@ -22,7 +22,9 @@ export function useSupabaseTransactions() {
         const storedTransactions = await fetchTransactions();
 
         if (isMounted) {
-          setTransactions(storedTransactions);
+          setTransactions((current) =>
+            mergeTransactions(current, storedTransactions),
+          );
           setError(null);
         }
       } catch (loadError) {
@@ -50,8 +52,10 @@ export function useSupabaseTransactions() {
     try {
       const savedTransaction = await insertTransaction(transaction);
       setTransactions((current) =>
-        current.map((item) =>
-          item.id === transaction.id ? savedTransaction : item,
+        mergeTransactions(
+          current.map((item) =>
+            item.id === transaction.id ? savedTransaction : item,
+          ),
         ),
       );
     } catch (insertError) {
@@ -100,6 +104,19 @@ export function useSupabaseTransactions() {
     isLoaded,
     error,
   };
+}
+
+function mergeTransactions(...transactionGroups: Transaction[][]): Transaction[] {
+  const transactionsById = new Map<string, Transaction>();
+
+  for (const transaction of transactionGroups.flat()) {
+    transactionsById.set(transaction.id, transaction);
+  }
+
+  return [...transactionsById.values()].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }
 
 function getErrorMessage(error: unknown): string {
