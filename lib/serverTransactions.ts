@@ -6,12 +6,49 @@ type TransactionRow = Database["public"]["Tables"]["transactions"]["Row"];
 const TRANSACTION_COLUMNS = "id,payer,note,amount,expression,created_at";
 
 export async function fetchInitialTransactions(): Promise<Transaction[]> {
+  const health = await checkInitialTransactionsHealth();
+
+  if (!health.ok || !health.rows) {
+    console.error("Initial Supabase transaction fetch failed", health);
+    return [];
+  }
+
+  return health.rows.map(rowToTransaction);
+}
+
+export async function checkInitialTransactionsHealth(): Promise<
+  | {
+      ok: false;
+      hasUrl: boolean;
+      hasPublishableKey: boolean;
+      status: null;
+      rowCount: null;
+      rows?: never;
+      error: string;
+    }
+  | {
+      ok: boolean;
+      hasUrl: true;
+      hasPublishableKey: true;
+      status: number;
+      rowCount: number | null;
+      rows?: TransactionRow[];
+      error: string | null;
+    }
+> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabasePublishableKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabasePublishableKey) {
-    return [];
+    return {
+      ok: false,
+      hasUrl: Boolean(supabaseUrl),
+      hasPublishableKey: Boolean(supabasePublishableKey),
+      status: null,
+      rowCount: null,
+      error: "Missing Supabase environment variables.",
+    };
   }
 
   const requestUrl = new URL("/rest/v1/transactions", supabaseUrl);
@@ -27,11 +64,26 @@ export async function fetchInitialTransactions(): Promise<Transaction[]> {
   });
 
   if (!response.ok) {
-    return [];
+    return {
+      ok: false,
+      hasUrl: true,
+      hasPublishableKey: true,
+      status: response.status,
+      rowCount: null,
+      error: await response.text(),
+    };
   }
 
   const rows = (await response.json()) as TransactionRow[];
-  return rows.map(rowToTransaction);
+  return {
+    ok: true,
+    hasUrl: true,
+    hasPublishableKey: true,
+    status: response.status,
+    rowCount: rows.length,
+    rows,
+    error: null,
+  };
 }
 
 function rowToTransaction(row: TransactionRow): Transaction {
