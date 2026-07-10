@@ -23,7 +23,7 @@ export function HistoryPanel({
         isOpen ? "translate-x-0" : "translate-x-full"
       }`}
     >
-      <div className="mb-5 flex items-center justify-between gap-4">
+      <div className="mb-5 mt-4 flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold">History</h2>
         <button
           type="button"

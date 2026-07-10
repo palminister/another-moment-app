@@ -66,7 +66,7 @@ export function AppShell({ initialTransactions }: AppShellProps) {
 
   return (
     <main className="relative isolate mx-auto flex h-[100vh] min-h-[100vh] w-full max-w-[402px] flex-col overflow-hidden bg-app-background px-4 py-6 justify-between">
-      <div className="flex flex-col bg-app-screen border-8 border-app-gray rounded-t-[56px] rounded-b-[32px] flex-grow mb-4 justify-betwee overflow-hidden">
+      <div className="flex flex-col bg-app-screen border-8 border-app-gray rounded-t-[56px] rounded-b-[32px] flex-grow mb-4 mt-4 justify-betwee overflow-hidden">
         <BalanceSummary
           balance={balance}
           transactions={transactions}
