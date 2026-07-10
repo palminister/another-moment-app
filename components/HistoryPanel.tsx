@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { formatCurrency } from "@/lib/ledger";
 import type { Transaction } from "@/lib/types";
 
@@ -16,6 +17,35 @@ export function HistoryPanel({
   onClose,
   onDelete,
 }: HistoryPanelProps) {
+  const [openTransactionId, setOpenTransactionId] = useState<string | null>(
+    null,
+  );
+  const [swipeStartX, setSwipeStartX] = useState<number | null>(null);
+  const revealDistance = 88;
+  const swipeThreshold = 36;
+
+  function handlePointerDown(clientX: number) {
+    setSwipeStartX(clientX);
+  }
+
+  function handlePointerUp(transactionId: string, clientX: number) {
+    if (swipeStartX === null) {
+      return;
+    }
+
+    const swipeDistance = clientX - swipeStartX;
+
+    if (swipeDistance <= -swipeThreshold) {
+      setOpenTransactionId(transactionId);
+    }
+
+    if (swipeDistance >= swipeThreshold) {
+      setOpenTransactionId(null);
+    }
+
+    setSwipeStartX(null);
+  }
+
   return (
     <aside
       aria-hidden={!isOpen}
@@ -39,38 +69,55 @@ export function HistoryPanel({
       ) : (
         <ul className="space-y-3 overflow-y-scroll h-full">
           {transactions.map((transaction) => (
-            <li key={transaction.id} className="rounded border p-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold divide-y-4">
-                    {transaction.payer}
-                    <span className="text-xs font-mono font-light text-gray-400">
-                      {" "}
-                      ·{" "}
+            <li
+              key={transaction.id}
+              className="relative overflow-hidden rounded border bg-white"
+            >
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 w-[88px] bg-app-background px-4 text-sm font-semibold text-white transition-opacity duration-200"
+                onClick={() => {
+                  onDelete(transaction.id);
+                  setOpenTransactionId(null);
+                }}
+              >
+                Delete
+              </button>
+              <div
+                className="relative bg-white p-3 transition-transform duration-300 ease-out touch-pan-y"
+                style={{
+                  transform:
+                    openTransactionId === transaction.id
+                      ? `translateX(-${revealDistance}px)`
+                      : "translateX(0)",
+                }}
+                onPointerDown={(event) => handlePointerDown(event.clientX)}
+                onPointerUp={(event) =>
+                  handlePointerUp(transaction.id, event.clientX)
+                }
+                onPointerCancel={() => setSwipeStartX(null)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold divide-y-4">
+                      {transaction.payer}
+                    </p>
+                    <p className="truncate w-[200px] mt-2 text-sm">
+                      {transaction.note || "No note"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      <span className="font-mono">฿</span>
+                      {formatCurrency(transaction.amount)}
+                    </p>
+                    <p className="mt-2 text-xs  font-mono font-light text-gray-400">
                       {new Intl.DateTimeFormat("en-GB", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "2-digit",
+                        dateStyle: "short",
                         timeZone: "Asia/Bangkok",
                       }).format(new Date(transaction.createdAt))}
-                    </span>
-                  </p>
-                  <p className="truncate w-[200px] mt-2 text-sm">
-                    {transaction.note || "No note"}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">
-                    <span className="font-mono">฿</span>
-                    {formatCurrency(transaction.amount)}
-                  </p>
-                  <button
-                    type="button"
-                    className="mt-2 text-sm underline"
-                    onClick={() => onDelete(transaction.id)}
-                  >
-                    Delete
-                  </button>
+                    </p>
+                  </div>
                 </div>
               </div>
             </li>
