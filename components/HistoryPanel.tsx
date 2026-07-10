@@ -20,30 +20,59 @@ export function HistoryPanel({
   const [openTransactionId, setOpenTransactionId] = useState<string | null>(
     null,
   );
-  const [swipeStartX, setSwipeStartX] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const revealDistance = 88;
   const swipeThreshold = 36;
+  const verticalTolerance = 28;
 
-  function handlePointerDown(clientX: number) {
-    setSwipeStartX(clientX);
+  function handleTouchStart(touch: React.Touch) {
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
   }
 
-  function handlePointerUp(transactionId: string, clientX: number) {
-    if (swipeStartX === null) {
+  function handleTouchMove(event: React.TouchEvent<HTMLDivElement>) {
+    if (!touchStart) {
       return;
     }
 
-    const swipeDistance = clientX - swipeStartX;
+    const touch = event.touches[0];
 
-    if (swipeDistance <= -swipeThreshold) {
+    if (!touch) {
+      return;
+    }
+
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 8) {
+      event.preventDefault();
+    }
+  }
+
+  function handleTouchEnd(transactionId: string, touch: React.Touch) {
+    if (!touchStart) {
+      return;
+    }
+
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+
+    if (Math.abs(deltaY) > verticalTolerance) {
+      setTouchStart(null);
+      return;
+    }
+
+    if (deltaX <= -swipeThreshold) {
       setOpenTransactionId(transactionId);
     }
 
-    if (swipeDistance >= swipeThreshold) {
+    if (deltaX >= swipeThreshold) {
       setOpenTransactionId(null);
     }
 
-    setSwipeStartX(null);
+    setTouchStart(null);
   }
 
   return (
@@ -91,11 +120,14 @@ export function HistoryPanel({
                       ? `translateX(-${revealDistance}px)`
                       : "translateX(0)",
                 }}
-                onPointerDown={(event) => handlePointerDown(event.clientX)}
-                onPointerUp={(event) =>
-                  handlePointerUp(transaction.id, event.clientX)
+                onTouchStart={(event) =>
+                  handleTouchStart(event.changedTouches[0])
                 }
-                onPointerCancel={() => setSwipeStartX(null)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={(event) =>
+                  handleTouchEnd(transaction.id, event.changedTouches[0])
+                }
+                onTouchCancel={() => setTouchStart(null)}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
