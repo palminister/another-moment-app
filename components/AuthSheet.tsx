@@ -43,7 +43,7 @@ export function AuthSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-title"
-        className={`absolute inset-x-0 bottom-0 m-auto max-w-[354px] bg-white p-5 transition-transform duration-300 ${
+        className={`absolute font-palm inset-x-0 bottom-0 m-auto max-w-[354px] bg-white p-5 transition-transform duration-300 ${
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
@@ -81,9 +81,7 @@ export function AuthSheet({
               />
             </label>
             <label className="block">
-              <span className="mb-2 block text-sm font-semibold">
-                Password
-              </span>
+              <span className="mb-2 block text-sm font-semibold">Password</span>
               <input
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
