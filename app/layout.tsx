@@ -108,6 +108,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         {appleStartupImages.map((image) => (
           <link
             key={image.href}
