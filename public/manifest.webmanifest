@@ -4,8 +4,8 @@
   "description": "A shared-balance calculator for choosing the next moment together.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#FFE4B3",
+  "theme_color": "#FFE4B3",
   "icons": [
     {
       "src": "/icon-192.png",
